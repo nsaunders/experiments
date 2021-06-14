@@ -1,12 +1,11 @@
-import {IO} from "fp-ts/lib/IO";
-import {pipe} from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import React, { FC, ReactNode, useEffect, useState } from "react";
 import { Button } from "./Button";
 
 interface UI<A> {
   initialState: A;
   query: () => A;
-  render: (onChange: () => void) => IO<[Node[], IO<void>]>;
+  render: (onChange: () => void) => [Node[], () => void];
 }
 
 function number({ defaultValue }: { defaultValue: number; }): UI<number> {
@@ -17,7 +16,7 @@ function number({ defaultValue }: { defaultValue: number; }): UI<number> {
       const value = input ? parseFloat(input.value) : NaN;
       return isNaN(value) ? defaultValue : value;
     },
-    render: onChange => () => {
+    render: onChange => {
       input = document.createElement("input");
       input.type = "number";
       input.value = defaultValue.toString();
@@ -35,7 +34,7 @@ function string({ defaultValue }: { defaultValue: string; }): UI<string> {
   return {
     initialState: defaultValue,
     query: () => input ? input.value : defaultValue,
-    render: onChange => () => {
+    render: onChange => {
       input = document.createElement("input");
       input.value = defaultValue.toString();
       input.addEventListener("input", onChange);
@@ -51,9 +50,9 @@ function apUI<A, B>(fa: UI<A>) {
   return (fatob: UI<(a: A) => B>): UI<B> => ({
     initialState: fatob.initialState(fa.initialState),
     query: () => fatob.query()(fa.query()),
-    render: onChange => () => {
-      const [nodesA, teardownA] = fatob.render(onChange)();
-      const [nodesB, teardownB] = fa.render(onChange)();
+    render: onChange => {
+      const [nodesA, teardownA] = fatob.render(onChange);
+      const [nodesB, teardownB] = fa.render(onChange);
       return [
         nodesA.concat(nodesB),
         () => { teardownA(); teardownB(); }
@@ -66,7 +65,7 @@ function pureUI<A>(a: A): UI<A> {
   return {
     initialState: a,
     query: () => a,
-    render: () => () => [[], () => {}],
+    render: () => [[], () => {}],
   };
 }
 
@@ -87,7 +86,7 @@ function makeDemo<A>(knobs: UI<A>, render: (_: A) => ReactNode): FC<{}> {
 
     useEffect(() => {
       if (controlPanel) {
-        const [nodes, teardown] = knobs.render(onChange)();
+        const [nodes, teardown] = knobs.render(onChange);
         nodes.forEach(node => controlPanel.appendChild(node));
         return () => {
           while (controlPanel.firstChild) controlPanel.removeChild(controlPanel.firstChild);
@@ -117,7 +116,13 @@ export const App = makeDemo(
   pipe(
     aUI.of((name: string) => (age: number) => `${name} is ${age}`),
     aUI.ap(string({ defaultValue: "Nicolin" })),
-    aUI.ap(number({ defaultValue: 5 })),
+    aUI.ap(
+      pipe(
+        aUI.of((a: number) => (b: number) => a + b),
+        aUI.ap(number({ defaultValue: 5 })),
+        aUI.ap(number({ defaultValue: 8 })),
+      ),
+    ),
   ),
   st => (
     <div style={{background:"black",color:"white"}}>{JSON.stringify(st)}</div>
