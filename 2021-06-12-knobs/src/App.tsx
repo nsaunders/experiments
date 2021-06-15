@@ -4,12 +4,6 @@ import { pipe } from "fp-ts/lib/function";
 import React, { FC, ReactNode, useEffect, useState } from "react";
 import { Button } from "./Button";
 
-interface UI<A> {
-  initialState: A;
-  query: () => A;
-  render: (onChange: () => void) => [Node[], () => void];
-}
-
 function makeDemo<A>(knobs: Flare<A>, render: (_: A) => ReactNode): FC<{}> {
   return function() {
     const [state, setState] = useState<A>(knobs.initialState);
