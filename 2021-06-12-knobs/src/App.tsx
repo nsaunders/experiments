@@ -24,7 +24,7 @@ function makeDemo<A>(knobs: Flare<A>, render: (_: A) => ReactNode): FC<{}> {
 export const App = makeDemo(
   pipe(
     F.of((name: string) => (age: string) => (exclaim: boolean) => `${name} is ${age}${exclaim ? "!" : "."}`),
-    F.ap(F.string({ defaultValue: "Little Nick" })),
+    F.ap(F.select({ defaultValue: "Nick" as const, options: ["Nick", "Liz"] as const })),
     F.ap(
       pipe(
         F.of((y: number) => (m: number | undefined) => `${y}y${m ? `${m}m` : ""}`),

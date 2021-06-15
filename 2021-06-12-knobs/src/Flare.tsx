@@ -117,6 +117,24 @@ export function number({ defaultValue }: { defaultValue: number; }): Flare<numbe
   };
 }
 
+export function select<O extends string, S extends O>({ defaultValue, options }: { defaultValue: S, options: Readonly<O[]> }): Flare<O> {
+  let state = defaultValue;
+  return {
+    initialState: defaultValue,
+    query: () => state,
+    render: ({ onChange }) => (
+      <select
+        defaultValue={state}
+        onChange={({ target: { value } }) => {
+          state = value as S;
+          onChange();
+        }}>
+          {options.map(value => (<option key={value}>{value}</option>))}
+      </select>
+    ),
+  };
+}
+
 export function string({ defaultValue }: { defaultValue: string; }): Flare<string> {
   let state = defaultValue;
   return {
