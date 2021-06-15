@@ -2,7 +2,6 @@ import * as F from "./Flare";
 import { Flare } from "./Flare";
 import { pipe } from "fp-ts/lib/function";
 import React, { FC, ReactNode, useEffect, useState } from "react";
-import { Button } from "./Button";
 
 function makeDemo<A>(knobs: Flare<A>, render: (_: A) => ReactNode): FC<{}> {
   return function() {
