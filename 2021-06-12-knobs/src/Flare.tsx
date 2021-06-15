@@ -12,7 +12,6 @@ declare module "fp-ts/lib/HKT" {
 }
 
 export interface Flare<A> {
-  initialState: A;
   query: () => A;
   render: FC<{ onChange: () => void; children?: undefined; }>;
 }
@@ -23,7 +22,6 @@ export const flare: Monad1<URI> = {
     const ComponentFAB = fab.render;
     const ComponentFA = fa.render;
     return {
-      initialState: fab.initialState(fa.initialState),
       query: () => fab.query()(fa.query()),
       render: ({ onChange }) => (
         <>
@@ -37,7 +35,6 @@ export const flare: Monad1<URI> = {
     const ComponentFA = fa.render;
     let flareB = f(fa.query());
     return {
-      initialState: flareB.initialState,
       query: () => flareB.query(),
       render: ({ onChange }) => (
         <>
@@ -53,14 +50,12 @@ export const flare: Monad1<URI> = {
   },
   map: function(ma, f) {
     return {
-      initialState: f(ma.initialState),
       query: () => f(ma.query()),
       render: ma.render,
     };
   },
   of: function(a) {
     return {
-      initialState: a,
       query: () => a,
       render: () => null,
     };
@@ -83,7 +78,6 @@ export const of = flare.of;
 export function checkbox({ defaultValue }: { defaultValue: boolean; }): Flare<boolean> {
   let state = defaultValue;
   return {
-    initialState: defaultValue,
     query: () => state,
     render: ({ onChange }) => (
       <input
@@ -100,7 +94,6 @@ export function checkbox({ defaultValue }: { defaultValue: boolean; }): Flare<bo
 export function number({ defaultValue }: { defaultValue: number; }): Flare<number> {
   let state = defaultValue;
   return {
-    initialState: defaultValue,
     query: () => state,
     render: ({ onChange }) => (
       <input
@@ -120,7 +113,6 @@ export function number({ defaultValue }: { defaultValue: number; }): Flare<numbe
 export function select<O extends string, S extends O>({ defaultValue, options }: { defaultValue: S, options: Readonly<O[]> }): Flare<O> {
   let state = defaultValue;
   return {
-    initialState: defaultValue,
     query: () => state,
     render: ({ onChange }) => (
       <select
@@ -138,7 +130,6 @@ export function select<O extends string, S extends O>({ defaultValue, options }:
 export function string({ defaultValue }: { defaultValue: string; }): Flare<string> {
   let state = defaultValue;
   return {
-    initialState: defaultValue,
     query: () => state,
     render: ({ onChange }) => (
       <input
