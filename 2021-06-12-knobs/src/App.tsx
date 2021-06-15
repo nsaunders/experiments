@@ -8,22 +8,11 @@ function makeDemo<A>(knobs: Flare<A>, render: (_: A) => ReactNode): FC<{}> {
     const [state, setState] = useState<A>(knobs.initialState);
     const onChange = () => { setState(knobs.query()); };
 
-    const [controlPanel, setControlPanel] = useState<Node | null>(null);
-
-    useEffect(() => {
-      if (controlPanel) {
-        const [nodes, teardown] = knobs.render(onChange);
-        nodes.forEach(node => controlPanel.appendChild(node));
-        return () => {
-          while (controlPanel.firstChild) controlPanel.removeChild(controlPanel.firstChild);
-          teardown();
-        };
-      }
-    }, [controlPanel]);
-
     return (
       <>
-        <div style={{background:"lightgray"}} ref={setControlPanel} />
+        <div style={{background:"lightgray"}}>
+          {knobs.render({ onChange })}
+        </div>
         <div style={{border:"1px solid red",padding:8}}>
           {render(state)}
         </div>
@@ -35,12 +24,12 @@ function makeDemo<A>(knobs: Flare<A>, render: (_: A) => ReactNode): FC<{}> {
 export const App = makeDemo(
   pipe(
     F.of((name: string) => (age: string) => (exclaim: boolean) => `${name} is ${age}${exclaim ? "!" : "."}`),
-    F.ap(F.string({ defaultValue: "Nicolin" })),
+    F.ap(F.string({ defaultValue: "Little Nick" })),
     F.ap(
       pipe(
-        F.of((y: number) => (m: number) => `${y}y${m}m`),
+        F.of((y: number) => (m: number | undefined) => `${y}y${m ? `${m}m` : ""}`),
         F.ap(F.number({ defaultValue: 3 })),
-        F.ap(pipe(F.checkbox({ defaultValue: true }), F.chain(x => x ? F.number({ defaultValue: 9 }) : F.of(0)))),
+        F.ap(pipe(F.checkbox({ defaultValue: true }), F.chain(x => x ? F.number({ defaultValue: 9 }) : F.of(undefined)))),
       ),
     ),
     F.ap(F.checkbox({ defaultValue: true })),
