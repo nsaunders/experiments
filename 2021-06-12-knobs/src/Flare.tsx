@@ -82,7 +82,7 @@ export function checkbox({ defaultValue }: { defaultValue: boolean; }): Flare<bo
     render: ({ onChange }) => (
       <input
         type="checkbox"
-        defaultChecked={defaultValue}
+        checked={state}
         onChange={({ target: { checked } }) => {
           state = checked;
           onChange();
@@ -98,7 +98,7 @@ export function number({ defaultValue }: { defaultValue: number; }): Flare<numbe
     render: ({ onChange }) => (
       <input
         type="number"
-        defaultValue={defaultValue}
+        value={state}
         onChange={({ target: { value } }) => {
           const val = parseFloat(value);
           if (!isNaN(val)) {
@@ -116,7 +116,7 @@ export function select<O extends string, S extends O>({ defaultValue, options }:
     query: () => state,
     render: ({ onChange }) => (
       <select
-        defaultValue={state}
+        value={state}
         onChange={({ target: { value } }) => {
           state = value as S;
           onChange();
@@ -134,7 +134,7 @@ export function string({ defaultValue }: { defaultValue: string; }): Flare<strin
     render: ({ onChange }) => (
       <input
         type="text"
-        defaultValue={defaultValue}
+        value={state}
         onChange={({ target: { value } }) => {
           state = value;
           onChange();
