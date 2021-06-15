@@ -34,8 +34,16 @@ export const flare: Monad1<URI> = {
   },
   chain: function(fa, f) {
     return {
-      ...f(fa.query()),
       initialState: f(fa.initialState).initialState,
+      query: () => f(fa.query()).query(),
+      render: onChange => {
+        const [nodesA, teardownA] = fa.render(onChange);
+        const [nodesB, teardownB] = f(fa.query()).render(onChange);
+        return [
+          nodesA.concat(nodesB),
+          () => { teardownA(); teardownB(); }
+        ];
+      },
     };
   },
   map: function(ma, f) {
@@ -63,8 +71,8 @@ function flip2<A, B, Y>(f: (a: A, b: B) => Y): (b: B, a: A) => Y {
 }
 
 export const ap = curry2(flip2(flare.ap));
-export const chain = curry2(flare.chain);
-export const map = curry2(flare.map);
+export const chain = curry2(flip2(flare.chain));
+export const map = curry2(flip2(flare.map));
 export const of = flare.of;
 
 export function checkbox({ defaultValue }: { defaultValue: boolean; }): Flare<boolean> {

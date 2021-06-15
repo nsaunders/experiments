@@ -41,15 +41,16 @@ function makeDemo<A>(knobs: Flare<A>, render: (_: A) => ReactNode): FC<{}> {
 
 export const App = makeDemo(
   pipe(
-    F.of((name: string) => (age: number) => (exclaim: boolean) => `${name} is ${age}${exclaim ? "!" : "."}`),
+    F.of((name: string) => (age: string) => (exclaim: boolean) => `${name} is ${age}${exclaim ? "!" : "."}`),
     F.ap(F.string({ defaultValue: "Nicolin" })),
     F.ap(
       pipe(
-        F.of((a: number) => (b: number) => a + b),
-        F.ap(F.number({ defaultValue: 5 })),
-        F.ap(F.number({ defaultValue: 8 })),
+        F.of((y: number) => (m: number) => `${y}y${m}m`),
+        F.ap(F.number({ defaultValue: 3 })),
+        F.ap(pipe(F.checkbox({ defaultValue: true }), F.chain(x => x ? F.number({ defaultValue: 9 }) : F.of(0)))),
       ),
     ),
+    F.ap(F.checkbox({ defaultValue: true })),
   ),
   st => (
     <div style={{background:"black",color:"white"}}>{JSON.stringify(st)}</div>
