@@ -75,6 +75,10 @@ export const chain = curry2(flip2(flare.chain));
 export const map = curry2(flip2(flare.map));
 export const of = flare.of;
 
+export function ifElse<A, B>(a: Flare<A>, b: Flare<B>): (cond: boolean) => Flare<A | B> {
+  return cond => cond ? a : b;
+}
+
 export function checkbox({ defaultValue }: { defaultValue: boolean; }): Flare<boolean> {
   let state = defaultValue;
   return {

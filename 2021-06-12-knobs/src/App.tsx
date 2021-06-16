@@ -2,11 +2,11 @@ import * as F from "./Flare";
 import { Flare } from "./Flare";
 import { pipe } from "fp-ts/lib/function";
 import React, { FC, ReactNode, useState } from "react";
-import { Button, ButtonProps } from "./Button";
+import { Button, ButtonBlockProps } from "./Button";
 
-function makeDemo<A>(knobs: Flare<A>, render: (_: A) => ReactNode): FC<{}> {
+function makeDemo(knobs: Flare<ReactNode>): FC<{}> {
   return function() {
-    const [state, setState] = useState<A>(knobs.query());
+    const [state, setState] = useState<ReactNode>(knobs.query());
     const onChange = () => { setState(knobs.query()); };
 
     return (
@@ -15,7 +15,7 @@ function makeDemo<A>(knobs: Flare<A>, render: (_: A) => ReactNode): FC<{}> {
           {knobs.render({ onChange })}
         </div>
         <div style={{border:"1px solid red",padding:8}}>
-          {render(state)}
+          {state}
         </div>
       </>
     );
@@ -27,20 +27,18 @@ const alignment = F.select({
   options: ["left", "center", "right"] as const,
 });
 
-const blockProps = pipe(
+const blockProps: Flare<ButtonBlockProps> = pipe(
   F.checkbox({ defaultValue: true }),
-  F.chain(block => (
-    block
-    ? pipe(alignment, F.map(alignment => ({ block, alignment })))
-    : F.of({ block: false })
+  F.chain(F.ifElse(
+    pipe(alignment, F.map(alignment => ({ block: true, alignment }))),
+    F.of({ block: false, alignment: undefined }),
   )),
 );
 
 export const App = makeDemo(
   pipe(
-    F.of((label: string) => (blockProps: any) => ({ label, ...blockProps })),
+    F.of((label: string) => (blockProps: ButtonBlockProps) => (<Button {...{ label, ...blockProps }} />)),
     F.ap(F.string({ defaultValue: "Button" })),
     F.ap(blockProps),
   ),
-  Button,
 );

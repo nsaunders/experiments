@@ -2,8 +2,7 @@ import React, { FC } from "react";
 import * as t from "io-ts";
 import { getPropTypes } from "prop-types-ts";
 
-const ButtonPropsSpec = t.intersection([
-  t.type({ label: t.string }),
+const ButtonBlockProps =
   t.union([
     t.type({
       block: t.literal(true),
@@ -17,10 +16,16 @@ const ButtonPropsSpec = t.intersection([
       block: t.literal(false),
       alignment: t.undefined
     })
-  ])
+  ]);
+
+export type ButtonBlockProps = t.TypeOf<typeof ButtonBlockProps>;
+
+const ButtonProps = t.intersection([
+  t.type({ label: t.string }),
+  ButtonBlockProps
 ]);
 
-export type ButtonProps = t.TypeOf<typeof ButtonPropsSpec>;
+export type ButtonProps = t.TypeOf<typeof ButtonProps>;
 
 export const Button: FC<ButtonProps> = props => (
   <button
@@ -33,4 +38,4 @@ export const Button: FC<ButtonProps> = props => (
   </button>
 );
 
-Button.propTypes = getPropTypes(ButtonPropsSpec) as any;
+Button.propTypes = getPropTypes(ButtonProps) as any;
