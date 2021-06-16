@@ -2,6 +2,7 @@ import * as F from "./Flare";
 import { Flare } from "./Flare";
 import { pipe } from "fp-ts/lib/function";
 import React, { FC, ReactNode, useState } from "react";
+import { Button, ButtonProps } from "./Button";
 
 function makeDemo<A>(knobs: Flare<A>, render: (_: A) => ReactNode): FC<{}> {
   return function() {
@@ -21,25 +22,25 @@ function makeDemo<A>(knobs: Flare<A>, render: (_: A) => ReactNode): FC<{}> {
   };
 }
 
+const alignment = F.select({
+  defaultValue: "center" as const,
+  options: ["left", "center", "right"] as const,
+});
+
+const blockProps = pipe(
+  F.checkbox({ defaultValue: true }),
+  F.chain(block => (
+    block
+    ? pipe(alignment, F.map(alignment => ({ block, alignment })))
+    : F.of({ block: false })
+  )),
+);
+
 export const App = makeDemo(
   pipe(
-    F.of((name: string) => (age: string) => (exclaim: boolean) => `${name} is ${age}${exclaim ? "!" : "."}`),
-    F.ap(
-      pipe(
-        F.select({ defaultValue: "Nick" as const, options: ["Wyman", "Nick", "Liz"] as const }),
-        F.chain(who => who === "Wyman" || who === "Nick" ? pipe(F.select({ defaultValue: "Sr", options: ["Sr", "Jr"] }), F.map(suffix => `${who} ${suffix}`)) : F.of(who)),
-      ),
-    ),
-    F.ap(
-      pipe(
-        F.of((y: number) => (m: number | undefined) => `${y}y${m ? `${m}m` : ""}`),
-        F.ap(F.number({ defaultValue: 3 })),
-        F.ap(pipe(F.checkbox({ defaultValue: true }), F.chain(x => x ? F.number({ defaultValue: 9 }) : F.of(undefined)))),
-      ),
-    ),
-    F.ap(F.checkbox({ defaultValue: true })),
+    F.of((label: string) => (blockProps: any) => ({ label, ...blockProps })),
+    F.ap(F.string({ defaultValue: "Button" })),
+    F.ap(blockProps),
   ),
-  st => (
-    <div style={{background:"black",color:"white"}}>{JSON.stringify(st)}</div>
-  )
+  Button,
 );
